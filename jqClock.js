@@ -5,9 +5,9 @@
  * Dual licensed under the MIT and GPL licenses:
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Turns a jQuery dom element into a dynamic clock
- *  
+ *
  * @timestamp defaults to clients current time
  *   $("#mydiv").clock();
  *   >> will turn div into clock using client computer's current time
@@ -16,15 +16,15 @@
  *   tmstmp = parseFloat($("#timestmp").val()) * 1000;
  *   $("#mydiv").clock({"timestamp":tmstmp});
  *   >> will turn div into clock passing in server's current time as retrieved from hidden input, and after being converted to a javascript style timestamp
- *    
+ *
  * @format defaults to 12 hour format,
  *   or if langSet is indicated defaults to most appropriate format for that langSet
  *   $("#mydiv").clock(); >> will have 12 hour format
  *   $("#mydiv").clock({"langSet":"it"}); >> will have 24 hour format
- *   $("#mydiv").clock({"langSet":"en"}); >> will have 12 hour format 
+ *   $("#mydiv").clock({"langSet":"en"}); >> will have 12 hour format
  *   $("#mydiv").clock({"langSet":"en","format":"24"}); >> will have military style 24 hour format
  *   $("#mydiv").clock({"calendar":true}); >> will include the date with the time, and will update the date at midnight
- *         
+ *
  */
 
 (function($, undefined) {
@@ -32,7 +32,7 @@
 $.clock = { version: "2.0.2", locale: {} }
 
 t = new Array();
-  
+
 $.fn.clock = function(options) {
   var locale = {
     "it":{
@@ -63,7 +63,7 @@ $.fn.clock = function(options) {
 
   return this.each(function(){
     $.extend(locale,$.clock.locale);
-    options = options || {};  
+    options = options || {};
     options.timestamp = options.timestamp || "systime";
     systimestamp = new Date();
     systimestamp = systimestamp.getTime();
@@ -72,16 +72,18 @@ $.fn.clock = function(options) {
       mytimestamp = new Date(options.timestamp);
       options.sysdiff = options.timestamp - systimestamp;
     }
+
     options.langSet = options.langSet || "en";
     options.format = options.format || ((options.langSet!="en") ? "24" : "12");
     options.calendar = options.calendar || "true";
     options.seconds = options.seconds || "true";
+    options.utc = options.utc || "true";
 
     if (!$(this).hasClass("jqclock")){$(this).addClass("jqclock");}
 
     var addleadingzero = function(i){
       if (i<10){i="0" + i;}
-      return i;    
+      return i;
     },
     updateClock = function(el,myoptions) {
       var el_id = $(el).attr("id");
@@ -91,14 +93,25 @@ $.fn.clock = function(options) {
         mytimestamp = mytimestamp.getTime();
         mytimestamp = mytimestamp + myoptions.sysdiff;
         mytimestamp = new Date(mytimestamp);
-        var h=mytimestamp.getHours(),
-        m=mytimestamp.getMinutes(),
-        s=mytimestamp.getSeconds(),
-        dy=mytimestamp.getDay(),
-        dt=mytimestamp.getDate(),
-        mo=mytimestamp.getMonth(),
-        y=mytimestamp.getFullYear(),
-        ap="",
+        if (options.utc == "true") {
+          var h=mytimestamp.getUTCHours(),
+          m=mytimestamp.getUTCMinutes(),
+          s=mytimestamp.getUTCSeconds(),
+          dy=mytimestamp.getUTCDay(),
+          dt=mytimestamp.getUTCDate(),
+          mo=mytimestamp.getUTCMonth(),
+          y=mytimestamp.getUTCFullYear();
+        }
+        else {
+          var h=mytimestamp.getHours(),
+          m=mytimestamp.getMinutes(),
+          s=mytimestamp.getSeconds(),
+          dy=mytimestamp.getDay(),
+          dt=mytimestamp.getDate(),
+          mo=mytimestamp.getMonth(),
+          y=mytimestamp.getFullYear();
+        }
+        var ap="",
         calend="";
 
         if(myoptions.format=="12"){
@@ -126,7 +139,7 @@ $.fn.clock = function(options) {
       }
 
     }
-      
+
     updateClock($(this),options);
   });
 }
